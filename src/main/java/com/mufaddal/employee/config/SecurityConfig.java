@@ -14,11 +14,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Enable CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Disable CSRF for stateless API
+                .csrf(csrf -> csrf.disable())
+                // Configure authorization
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll()
+                        // Allow public access to API endpoints
+                        .requestMatchers("/api/employee", "/api/employees", "/api/employee/**").permitAll()
+                        // Allow root endpoint (optional, for testing)
+                        .requestMatchers("/").permitAll()
+                        // Require authentication for all other endpoints
                         .anyRequest().authenticated()
-                );
+                )
+                // Enable HTTP Basic Auth for protected endpoints
+                .httpBasic();
         return http.build();
     }
 
