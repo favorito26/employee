@@ -1,13 +1,16 @@
-# Build stage
-FROM maven:3.8.5-openjdk-17 AS build
+# 1. Build stage
+FROM maven:3.8.7-openjdk-17 AS builder
 WORKDIR /app
+
+# copy and build
 COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Run stage
-FROM eclipse-temurin:17-jdk-alpine
+# 2. Runtime stage
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
+COPY --from=builder /app/target/*.jar app.jar
+
+# environment variables can still be injected by Render
 ENTRYPOINT ["java", "-jar", "app.jar"]
